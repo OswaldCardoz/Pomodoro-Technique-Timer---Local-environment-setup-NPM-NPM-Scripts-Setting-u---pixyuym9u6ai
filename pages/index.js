@@ -44,6 +44,8 @@ const App = () => {
     setIsActive(false);
     setIsBreak(false);
     setTime(workDuration * 60);
+    setWorkDuration(25);
+    setBreakDuration(5);
   };
 
   const handleSet = () => {
@@ -56,18 +58,16 @@ const App = () => {
 
   const handleWorkDurationChange = (event) => {
     const value = parseInt(event.target.value);
-    setWorkDuration(value >= 0 ? value : 0);
+    setWorkDuration(value);
   };
 
   const handleBreakDurationChange = (event) => {
     const value = parseInt(event.target.value);
-    setBreakDuration(value >= 0 ? value : 0);
+    setBreakDuration(value);
   };
 
   return (
     <div id='main'>
-      <div>Work Duration: {workDuration} minutes</div>
-      <div>Break Duration: {breakDuration} minutes</div>
       <div>{isBreak ? 'Break Time' : 'Work Time'}</div>
       <div>Clock Time: {Math.floor(time / 60)}:{(time % 60).toString().padStart(2, '0')}</div>
       <button data-testid='set-btn' onClick={handleSet}>
