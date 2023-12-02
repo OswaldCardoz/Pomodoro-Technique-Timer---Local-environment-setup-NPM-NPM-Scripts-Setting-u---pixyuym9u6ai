@@ -49,8 +49,8 @@ const App = () => {
   };
 
   const handleSet = () => {
-    if (workDuration <= 0 || breakDuration <= 0) {
-      alert('Duration must be greater than 0');
+    if (workDuration <= 0 && breakDuration <= 0) {
+      alert('At least one duration must be greater than 0');
     } else {
       handleReset();
     }
@@ -60,7 +60,7 @@ const App = () => {
     const value = parseInt(event.target.value);
     setWorkDuration(value);
   };
-
+ 
   const handleBreakDurationChange = (event) => {
     const value = parseInt(event.target.value);
     setBreakDuration(value);
