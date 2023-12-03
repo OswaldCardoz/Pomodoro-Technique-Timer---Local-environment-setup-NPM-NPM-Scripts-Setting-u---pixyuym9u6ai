@@ -1,108 +1,109 @@
 //Write a code in index.js
+'use client';
 import React, { useState, useEffect } from 'react';
+
 const App = () => {
-  const [workDuration, setWorkDuration] = useState(25);
-  const [breakDuration, setBreakDuration] = useState(5);
-  const [time, setTime] = useState(workDuration * 60);
-  const [isActive, setIsActive] = useState(false);
-  const [isBreak, setIsBreak] = useState(false);
+  const defaultWorkDuration = 25;
+  const defaultBreakDuration = 5;
+
+  const [workDuration, setWorkDuration] = useState(defaultWorkDuration);
+  const [breakDuration, setBreakDuration] = useState(defaultBreakDuration);
+  const [timer, setTimer] = useState(null);
+  const [isWorking, setIsWorking] = useState(true);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   useEffect(() => {
-    if (isActive) {
-      const interval = setInterval(() => {
-        setTime((prevTime) => {
-          if (prevTime === 0) {
-            setIsBreak((prevIsBreak) => {
-              if (prevIsBreak) {
-                alert('Break time is over! Get back to work.');
-                return false;
-              } else {
-                alert('Work time is over! Take a break.');
-                return true;
-              }
-            });
-            return isBreak ? workDuration * 60 : breakDuration * 60;
+    document.title = `${isWorking ? 'Work' : 'Break'} - ${formatTime()}`;
+  }, [timer, isWorking]);
+
+  const formatTime = () => {
+    const currentDuration = isWorking ? workDuration : breakDuration;
+    return `${Math.floor(currentDuration / 60)}:${(currentDuration % 60)
+      .toString()
+      .padStart(2, '0')}`;
+  };
+
+  const startTimer = () => {
+    if (!isTimerRunning && (workDuration > 0 || breakDuration > 0)) {
+      setTimer(
+        setInterval(() => {
+          if (isWorking && workDuration > 0) {
+            setWorkDuration((prev) => prev - 1);
+          } else if (!isWorking && breakDuration > 0) {
+            setBreakDuration((prev) => prev - 1);
           } else {
-            return prevTime - 1;
+            setIsWorking((prev) => !prev);
+            if (isWorking) {
+              setWorkDuration(defaultWorkDuration);
+            } else {
+              setBreakDuration(defaultBreakDuration);
+            }
           }
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [isActive, isBreak, workDuration, breakDuration]);
-
-  const handleStart = () => {
-    setIsActive(true);
-  };
-
-  const handleStop = () => {
-    setIsActive(false);
-  };
-
-  const handleReset = () => {
-    setIsActive(false);
-    setIsBreak(false);
-    setTime(workDuration * 60);
-    setWorkDuration(25);
-    setBreakDuration(5);
-  };
-
-  const handleSet = () => {
-    if (workDuration <= 0 && breakDuration <= 0) {
-      alert('At least one duration must be greater than 0');
-    } else {
-      handleReset();
+        }, 1000)
+      );
+      setIsTimerRunning(true);
     }
   };
 
-  const handleWorkDurationChange = (event) => {
-    const value = parseInt(event.target.value);
-    setWorkDuration(value);
+  const stopTimer = () => {
+    clearInterval(timer);
+    setIsTimerRunning(false);
   };
- 
-  const handleBreakDurationChange = (event) => {
-    const value = parseInt(event.target.value);
-    setBreakDuration(value);
+
+  const resetTimer = () => {
+    clearInterval(timer);
+    setIsTimerRunning(false);
+    setWorkDuration(defaultWorkDuration);
+    setBreakDuration(defaultBreakDuration);
+    setIsWorking(true);
+  };
+
+  const handleWorkDurationChange = (e) => {
+    const value = parseInt(e.target.value, 10);
+    setWorkDuration(value >= 0 ? value : 0);
+  };
+
+  const handleBreakDurationChange = (e) => {
+    const value = parseInt(e.target.value, 10);
+    setBreakDuration(value >= 0 ? value : 0);
   };
 
   return (
-    <div id='main'>
-      <div>{isBreak ? 'Break Time' : 'Work Time'}</div>
-      <div>Clock Time: {Math.floor(time / 60)}:{(time % 60).toString().padStart(2, '0')}</div>
-      <button data-testid='set-btn' onClick={handleSet}>
-        Set
-      </button>
-      <button data-testid='start-btn' onClick={handleStart} disabled={isActive}>
-        Start
-      </button>
-      <button data-testid='stop-btn' onClick={handleStop} disabled={!isActive}>
-        Stop
-      </button>
-      <button data-testid='reset-btn' onClick={handleReset} disabled={!isActive}>
-        Reset
-      </button>
-      <label>
-        Work Duration:
+    <div id="main">
+      <div>
+        <label>Work Duration:</label>
         <input
-          type='number'
-          data-testid='work-duration'
+          type="number"
           value={workDuration}
           onChange={handleWorkDurationChange}
+          data-testid="work-duration"
+          disabled={isTimerRunning}
         />
-      </label>
-      <label>
-        Break Duration:
+      </div>
+      <div>
+        <label>Break Duration:</label>
         <input
-          type='number'
-          data-testid='break-duration'
+          type="number"
           value={breakDuration}
           onChange={handleBreakDurationChange}
+          data-testid="break-duration"
+          disabled={isTimerRunning}
         />
-      </label>
+      </div>
+      <div>
+        <p>{isWorking ? 'Work Time' : 'Break Time'}: {formatTime()}</p>
+      </div>
+      <button onClick={startTimer} disabled={isTimerRunning} data-testid="start-btn">
+        Start
+      </button>
+      <button onClick={stopTimer} disabled={!isTimerRunning} data-testid="stop-btn">
+        Stop
+      </button>
+      <button onClick={resetTimer} data-testid="reset-btn">
+        Reset
+      </button>
     </div>
   );
 };
-
 
 export default App;
